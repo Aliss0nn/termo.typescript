@@ -1,4 +1,4 @@
-import { termo } from "./termo.js";
+import { termo, resultadoEnum } from "./termo.js";
 
 class telaTermo{
   pnlConteudo: HTMLDivElement;
@@ -9,6 +9,7 @@ class telaTermo{
   jogo: termo;
   linha: number;
   coluna: number;
+  botoesClicados: HTMLButtonElement[];
    
   constructor(){
    this.registrarElementos();
@@ -17,6 +18,7 @@ class telaTermo{
    this.coluna = 0;
 
    this.jogo = new termo();
+   this.botoesClicados = [];
   }
 
   registrarElementos(): void{
@@ -73,70 +75,71 @@ class telaTermo{
 
       const lista = document.querySelectorAll(".letra");
 
-      for(let i = this.coluna * 5; i < this.coluna * 5 + 5; i++) {
-          palavra += (lista[i] as HTMLDivElement).textContent;
-      }
+        for (let i = this.coluna * 5; i < this.coluna * 5 + 5; i++) {
+            palavra += (lista[i] as HTMLDivElement).textContent;
+        }
 
-      const resultado: string = this.jogo.verificacaoPalavra(palavra);
+     const resultado: resultadoEnum[] = this.jogo.verificacaoPalavra(palavra);
 
-      this.atualizarEstilo(resultado.split(''));
+      this.atualizarEstilo(resultado);
 
       this.coluna += 1;
       this.linha = 0;
 
-      //this.verificarResultado();
+      this.verificarResultado();
   }
 
-  atualizarEstilo(palavra: string[]) {
+  atualizarEstilo(palavra: resultadoEnum[]) {
     const lista = document.querySelectorAll(".letra");
 
-    let j = 0;
+    let x = 0;
     for(let i = this.coluna * 5; i < this.coluna * 5 + 5; i++) {
         const celula = lista[i] as HTMLDivElement;
 
-        if (palavra[j] == 'X') {
+        if (palavra[x] == resultadoEnum.Acerto) {
             celula.style.backgroundColor = "#22dd55";
         }
 
-        else if (palavra[j] == 'C') {
+        else if (palavra[x] == resultadoEnum.Contido) {
             celula.style.backgroundColor = "#eded00";
         }
 
         else {
             celula.style.backgroundColor = "#5e5e5e";
+            this.botoesClicados[x].disabled = true;
         }
 
-        j++;
+        x++;
     }   
   }
 
- // verificarResultado(): void {
-  //  if (!this.jogo.fimDeJogo()) {
-  //      return;
- //   }
+ verificarResultado(): void {
+   if (!this.jogo.fimDeJogo()) {
+       return;
+   }
 
-  //  const resultado = this.jogo.obterResultado();
+   const resultado = this.jogo.obterResultado();
 
- //   this.lbNotificacao.style.display = "inline";
-  //  this.lbNotificacao.textContent = resultado;
+   this.lbNotificacao.style.display = "inline";
+   this.lbNotificacao.textContent = resultado;
 
-  //  if (this.jogo.venceu) {
-  //      this.lbNotificacao.className = "notificacao-acerto";
- //   }
+   if (this.jogo.venceu) {
+       this.lbNotificacao.className = "notificacao-acerto";
+   }
 
-  //  else {
-  //      this.lbNotificacao.className = "notificacao-erro";
-  //  }
+   else {
+       this.lbNotificacao.className = "notificacao-erro";
+   }
 
-  //  this.pnlTeclado.childNodes.forEach(b => {
-//const botao = b as HTMLButtonElement;
-  //      if (botao.id != "btnEnter") {
-   //         botao.disabled = true;
-   //     }
-   // });
-//}
+   this.pnlTeclado.childNodes.forEach(b => {
+const botao = b as HTMLButtonElement;
+       if (botao.id != "btnEnter") {
+           botao.disabled = true;
+       }
+   });
+}
 
-  resetarJogo(): void {
+resetarJogo(): void {
     this.linha = 0;
     this.coluna = 0;
     this.jogo.IniciarJogo();
@@ -148,13 +151,14 @@ class telaTermo{
 
     const lista = document.querySelectorAll(".letra");
 
-    for(let i = 0; i < lista.length; i++) {
+    for (let i = 0; i < lista.length; i++) {
         const celula = lista[i] as HTMLDivElement;
         celula.textContent = "";
         celula.style.backgroundColor = "#bebebe";
     }
 
     this.lbNotificacao.style.display = "none";
+    this.botoesClicados = [];
 }
 }
 
